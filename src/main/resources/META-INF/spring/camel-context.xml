@@ -60,13 +60,13 @@
             <log id="_log1" message="Header:command ${headers.command}"/>
             <choice id="ChoiceBotCommand">
                 <when id="whenSearchPhrase">
-                    <simple id="ifSearchPhrase">${headers.command} == 'search'</simple>
+                    <simple id="ifSearchPhrase">${headers.command} == ${type:ru.redhat.sa.bot.core.BotProcessor.SEARCH_MEM_CASE}</simple>
                     <log id="logSearchPhrase" message="SearchPhrase"/>
                     <setBody id="_setBody1">
                         <simple>${headers.phraseName}</simple>
                     </setBody>
                     <to id="searchPhrase" uri="mybatis:searchPhrase?statementType=SelectOne"/>
-                    <bean beanType="nickPostProcessor"
+                    <bean beanType="nickPostProcessor1"
                         id="nickPostProcessor" ref="nickPostProcessor"/>
                 </when>
                 <when id="whenStoreMem">
@@ -87,9 +87,7 @@
                         id="buildAliasMessage"
                         method="buildAliasMessage(${header.phraseName}, ${header.phraseAlias})" ref="messageBuilder"/>
                     <to id="insertMemAlias" uri="mybatis:insertAlias?statementType=Insert"/>
-                    <setBody id="_setBody3">
-                        <simple/>
-                    </setBody>
+                    <setBody id="_setBody3"><simple/></setBody>
                 </when>
                 <when id="whenListMem">
                     <simple id="ifListMem">${headers.command} == ${type:ru.redhat.sa.bot.core.BotProcessor.LIST_MEM_CASE}</simple>
@@ -100,6 +98,14 @@
                     <to id="getAllMems" uri="mybatis:getAllMems?statementType=SelectList"/>
                     <convertBodyTo id="_convertBodyTo1" type="java.lang.String"/>
                     <log id="logListMem" message="Body ${body}"/>
+                </when>
+                <when id="whenRandomPhrase">
+                    <simple id="ifRandomPhrase">${headers.command} == ${type:ru.redhat.sa.bot.core.BotProcessor.RANDOM_MEM_CASE}</simple>
+                    <log id="logRandomPhrase" message="RandomPhrase"/>
+                    <setBody id="_setBody4"><simple/></setBody>
+                    <to id="randomPhrase" uri="mybatis:getRandomPhrase?statementType=SelectOne"/>
+                    <bean beanType="nickPostProcessor"
+                        id="nickPostProcessor2" ref="nickPostProcessor"/>
                 </when>
             </choice>
         </route>

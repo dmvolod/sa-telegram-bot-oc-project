@@ -19,6 +19,7 @@ public class BotProcessor implements Processor {
 	
 	private static final String[] CONTROL_COMMANDS = {STORE_MEM_COMMAND, LINK_MEM_COMMAND, RANDOM_MEM_COMMAND, LIST_MEM_COMMAND};
 	
+	public static final String SEARCH_MEM_CASE = "search";
 	public static final String STORE_MEM_CASE = "storemem";
 	public static final String LINK_MEM_CASE = "addlink";
 	public static final String RANDOM_MEM_CASE = "randmem";
@@ -74,7 +75,7 @@ public class BotProcessor implements Processor {
         		
         	} else {
         		phraseName = command;
-        		command = "search";
+        		command = SEARCH_MEM_CASE;
         	}
         		
         	exchange.getOut().setHeader("command", command);
