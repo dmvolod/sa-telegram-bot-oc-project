@@ -11,11 +11,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class BotProcessor implements Processor {
 	
-	private static final String MEM_COMMAND = "мем";
-	private static final String LINK_COMMAND = "линк";
-	private static final String[] CONTROL_COMMANDS = {MEM_COMMAND, LINK_COMMAND};
+	private static final String STORE_MEM_COMMAND = "запомни";
+	private static final String LINK_MEM_COMMAND = "линк";
+	private static final String RANDOM_MEM_COMMAND = "мем";
 	
-	public static final String STORE_MEM_COMMAND = "storemem";
+	
+	private static final String[] CONTROL_COMMANDS = {STORE_MEM_COMMAND, LINK_MEM_COMMAND, RANDOM_MEM_COMMAND};
+	
+	public static final String STORE_MEM_CASE = "storemem";
+	public static final String LINK_MEM_CASE = "addlink";
+	public static final String RANDOM_MEM_CASE = "randmem";
 
 	@Override
 	public void process(Exchange exchange) throws Exception {
@@ -50,11 +55,11 @@ public class BotProcessor implements Processor {
         	
         	if (Arrays.asList(CONTROL_COMMANDS).contains(command)) {
         		switch (command) {
-        			case MEM_COMMAND:
-        				command = STORE_MEM_COMMAND;
+        			case STORE_MEM_COMMAND:
+        				command = STORE_MEM_CASE;
         				break;
-        			case LINK_COMMAND:
-        				command = "addlink";
+        			case LINK_MEM_COMMAND:
+        				command = LINK_MEM_CASE;
         				phraseAlias = phraseText;
         				break;
         		}

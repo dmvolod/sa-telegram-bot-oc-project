@@ -70,7 +70,7 @@
                         id="nickPostProcessor" ref="nickPostProcessor"/>
                 </when>
                 <when id="whenSetMem">
-                    <simple id="ifSetMem">${headers.command} == ${type:ru.redhat.sa.bot.core.BotProcessor.STORE_MEM_COMMAND}</simple>
+                    <simple id="ifSetMem">${headers.command} == ${type:ru.redhat.sa.bot.core.BotProcessor.STORE_MEM_CASE}</simple>
                     <log id="logSetMem" message="SetMem"/>
                     <bean beanType="messageBuilder"
                         id="buildPhraseMessage"
@@ -81,7 +81,7 @@
                     </setBody>
                 </when>
                 <when id="whenAddLink">
-                    <simple id="ifAAddLink">${headers.command} == 'addlink'</simple>
+                    <simple id="ifAAddLink">${headers.command} == ${type:ru.redhat.sa.bot.core.BotProcessor.LINK_MEM_CASE}</simple>
                     <log id="logAddLink" message="AddLink"/>
                     <bean beanType="messageBuilder"
                         id="buildAliasMessage"
@@ -94,7 +94,7 @@
             </choice>
         </route>
         <route id="_route1">
-            <from id="_from1" uri="telegram:bots/{{env:SA_TELEGRAM_BOT_TOKEN}}"/>
+            <from id="_from1" uri="telegram:bots/{{env:SA_TELEGRAM_BOT_TOKEN}}?sendEmptyMessageWhenIdle=true"/>
             <to id="_to2" uri="direct:botMain"/>
             <choice id="_choice1">
                 <when id="_when1">
