@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2005-2015 Red Hat, Inc. Red Hat licenses this file to you 
+	under the Apache License, version 2.0 (the "License"); you may not use this 
+	file except in compliance with the License. You may obtain a copy of the 
+	License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by 
+	applicable law or agreed to in writing, software distributed under the License 
+	is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY 
+	KIND, either express or implied. See the License for the specific language 
+	governing permissions and limitations under the License. -->
+<!-- Configures the Camel Context -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:camel="http://camel.apache.org/schema/spring"
+    xmlns:cxf="http://camel.apache.org/schema/cxf"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://camel.apache.org/schema/cxf http://camel.apache.org/schema/cxf/camel-cxf.xsd http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
+    <cxf:cxfEndpoint address="http://0.0.0.0:8000/bot-control-service"
+        id="controlServiceEndpoint" serviceClass="ru.redhat.sa.bot.control.ControlService"/>
+    <cxf:cxfEndpoint address="http://0.0.0.0:8000/bot-check-service"
+        id="checkServiceEndpoint" serviceClass="ru.redhat.sa.bot.control.CheckService"/>
+    <bean class="ru.redhat.sa.bot.core.BotProcessor" id="botProcessor"/>
+    <bean class="ru.redhat.sa.bot.core.MessageBuilder" id="messageBuilder"/>
+    <bean class="ru.redhat.sa.bot.core.NickNamePostProcessor" id="nickPostProcessor"/>
+    <camelContext id="camelContext-039f8b9f-d1b2-43c3-b43c-30a8a05a4010" xmlns="http://camel.apache.org/schema/spring">
+        <!--  propertyPlaceholder id="properties" location="application.properties"/-->
+        <route id="BotControlService">
+            <from id="fromControlServiceEndpoint" uri="cxf:bean:controlServiceEndpoint?allowStreaming=false&amp;dataFormat=POJO"/>
+            <log id="logOperationName" message="Operation Name: ${header.operationName}"/>
+            <choice id="ChoiceControlServiceOperation">
+                <when id="initiateDatabase">
+                    <simple id="initiateDatabase">${headers.operationName} == 'initiateDatabase'</simple>
+                    <to id="createTables" uri="mybatis:createTables?statementType=Update"/>
+                </when>
+                <when id="loadPhrases">
+                    <simple id="loadPhrases">${headers.operationName} == 'loadPhrases'</simple>
+                    <split id="phraseSplitter">
+                        <simple>${body}</simple>
+                        <!-- log id="logBody" message="Body: ${body}"/ -->
+                        <to id="insertPhrase" uri="mybatis:insertPhrase?statementType=Insert"/>
+                    </split>
+                </when>
+                <when id="loadAliases">
+                    <simple id="loadAliases">${headers.operationName} == 'loadAliases'</simple>
+                    <split id="aliasSplitter">
+                        <simple>${body}</simple>
+                        <!-- log id="logBody" message="Body: ${body}"/ -->
+                        <to id="insertAlias" uri="mybatis:insertAlias?statementType=Insert"/>
+                    </split>
+                </when>
+            </choice>
+        </route>
+        <route id="BotCheckService">
+            <from id="fromCheckServiceEndpoint" uri="cxf:bean:checkServiceEndpoint?allowStreaming=false&amp;dataFormat=POJO"/>
+            <bean beanType="messageBuilder"
+                id="buildIncomingTelegramMessage"
+                method="buildIncomingTelegramMessage" ref="messageBuilder"/>
+            <to id="toBotMainRoute" uri="direct:botMain"/>
+        </route>
+        <route id="BotMainRoute">
+            <from id="fromBotMainRoute" uri="direct:botMain"/>
+            <bean beanType="botProcessor" id="botProcessor" ref="botProcessor"/>
+            <log id="_log1" message="Header:command ${headers.command}"/>
+            <choice id="ChoiceBotCommand">
+                <when id="whenSearchPhrase">
+                    <simple id="ifSearchPhrase">${headers.command} == 'search'</simple>
+                    <log id="logSearchPhrase" message="SearchPhrase"/>
+                    <setBody id="_setBody1">
+                        <simple>${headers.phraseName}</simple>
+                    </setBody>
+                    <to id="searchPhrase" uri="mybatis:searchPhrase?statementType=SelectOne"/>
+                    <bean beanType="nickPostProcessor"
+                        id="nickPostProcessor" ref="nickPostProcessor"/>
+                </when>
+                <when id="whenSetMem">
+                    <simple id="ifSetMem">${headers.command} == ${type:ru.redhat.sa.bot.core.BotProcessor.STORE_MEM_COMMAND}</simple>
+                    <log id="logSetMem" message="SetMem"/>
+                    <bean beanType="messageBuilder"
+                        id="buildPhraseMessage"
+                        method="buildPhraseMessage(${header.phraseName}, ${header.phraseText}, 'MEM')" ref="messageBuilder"/>
+                    <to id="insertMemPhrase" uri="mybatis:insertPhrase?statementType=Insert"/>
+                    <setBody id="_setBody2">
+                        <simple/>
+                    </setBody>
+                </when>
+                <when id="whenAddLink">
+                    <simple id="ifAAddLink">${headers.command} == 'addlink'</simple>
+                    <log id="logAddLink" message="AddLink"/>
+                    <bean beanType="messageBuilder"
+                        id="buildAliasMessage"
+                        method="buildAliasMessage(${header.phraseName}, ${header.phraseAlias})" ref="messageBuilder"/>
+                    <to id="insertMemAlias" uri="mybatis:insertAlias?statementType=Insert"/>
+                    <setBody id="_setBody3">
+                        <simple/>
+                    </setBody>
+                </when>
+            </choice>
+        </route>
+        <route id="_route1">
+            <from id="_from1" uri="telegram:bots/{{env:SA_TELEGRAM_BOT_TOKEN}}"/>
+            <to id="_to2" uri="direct:botMain"/>
+            <choice id="_choice1">
+                <when id="_when1">
+                    <simple>${body} != ""</simple>
+                    <to id="_to1" uri="telegram:bots/{{env:SA_TELEGRAM_BOT_TOKEN}}"/>
+                </when>
+            </choice>
+        </route>
+    </camelContext>
+</beans>
