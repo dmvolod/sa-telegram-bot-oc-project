@@ -35,4 +35,9 @@ public class Phrase {
 		this.phraseType = phraseType;
 	}
 
+	@Override
+	public String toString() {
+		return "/" + phraseName + " - " + phraseText + "\n";
+	}
 }
+	

@@ -69,9 +69,9 @@
                     <bean beanType="nickPostProcessor"
                         id="nickPostProcessor" ref="nickPostProcessor"/>
                 </when>
-                <when id="whenSetMem">
-                    <simple id="ifSetMem">${headers.command} == ${type:ru.redhat.sa.bot.core.BotProcessor.STORE_MEM_CASE}</simple>
-                    <log id="logSetMem" message="SetMem"/>
+                <when id="whenStoreMem">
+                    <simple id="ifStoreMem">${headers.command} == ${type:ru.redhat.sa.bot.core.BotProcessor.STORE_MEM_CASE}</simple>
+                    <log id="logStoreMem" message="StoreMem"/>
                     <bean beanType="messageBuilder"
                         id="buildPhraseMessage"
                         method="buildPhraseMessage(${header.phraseName}, ${header.phraseText}, 'MEM')" ref="messageBuilder"/>
@@ -81,7 +81,7 @@
                     </setBody>
                 </when>
                 <when id="whenAddLink">
-                    <simple id="ifAAddLink">${headers.command} == ${type:ru.redhat.sa.bot.core.BotProcessor.LINK_MEM_CASE}</simple>
+                    <simple id="ifAddLink">${headers.command} == ${type:ru.redhat.sa.bot.core.BotProcessor.LINK_MEM_CASE}</simple>
                     <log id="logAddLink" message="AddLink"/>
                     <bean beanType="messageBuilder"
                         id="buildAliasMessage"
@@ -91,10 +91,20 @@
                         <simple/>
                     </setBody>
                 </when>
+                <when id="whenListMem">
+                    <simple id="ifListMem">${headers.command} == ${type:ru.redhat.sa.bot.core.BotProcessor.LIST_MEM_CASE}</simple>
+                    <!--  setBody id="_setBody4">
+                        <simple/>
+                    </setBody-->
+                    <log id="logListMem" message="ListMem"/>
+                    <to id="getAllMems" uri="mybatis:getAllMems?statementType=SelectList"/>
+                    <convertBodyTo id="_convertBodyTo1" type="java.lang.String"/>
+                    <log id="logListMem" message="Body ${body}"/>
+                </when>
             </choice>
         </route>
-        <route id="_route1">
-            <from id="_from1" uri="telegram:bots/{{env:SA_TELEGRAM_BOT_TOKEN}}?sendEmptyMessageWhenIdle=true"/>
+        <route autoStartup="{{env:SA_TELEGRAM_OC_ENV}}" id="_route1">
+            <from id="_from1" uri="telegram:bots/{{env:SA_TELEGRAM_BOT_TOKEN}}"/>
             <to id="_to2" uri="direct:botMain"/>
             <choice id="_choice1">
                 <when id="_when1">

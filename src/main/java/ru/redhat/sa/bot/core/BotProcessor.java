@@ -14,13 +14,15 @@ public class BotProcessor implements Processor {
 	private static final String STORE_MEM_COMMAND = "запомни";
 	private static final String LINK_MEM_COMMAND = "линк";
 	private static final String RANDOM_MEM_COMMAND = "мем";
+	private static final String LIST_MEM_COMMAND = "список";
 	
 	
-	private static final String[] CONTROL_COMMANDS = {STORE_MEM_COMMAND, LINK_MEM_COMMAND, RANDOM_MEM_COMMAND};
+	private static final String[] CONTROL_COMMANDS = {STORE_MEM_COMMAND, LINK_MEM_COMMAND, RANDOM_MEM_COMMAND, LIST_MEM_COMMAND};
 	
 	public static final String STORE_MEM_CASE = "storemem";
 	public static final String LINK_MEM_CASE = "addlink";
 	public static final String RANDOM_MEM_CASE = "randmem";
+	public static final String LIST_MEM_CASE = "listmem";
 
 	@Override
 	public void process(Exchange exchange) throws Exception {
@@ -57,6 +59,12 @@ public class BotProcessor implements Processor {
         		switch (command) {
         			case STORE_MEM_COMMAND:
         				command = STORE_MEM_CASE;
+        				break;
+        			case RANDOM_MEM_COMMAND:
+        				command = RANDOM_MEM_CASE;
+        				break;
+        			case LIST_MEM_COMMAND:
+        				command = LIST_MEM_CASE;
         				break;
         			case LINK_MEM_COMMAND:
         				command = LINK_MEM_CASE;
