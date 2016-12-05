@@ -1,5 +1,8 @@
 package ru.redhat.sa.bot.core;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.camel.component.telegram.model.IncomingMessage;
 import org.apache.camel.component.telegram.model.User;
 
@@ -27,6 +30,16 @@ public class MessageBuilder {
 	
 	public Alias buildAliasMessage(String phraseName, String aliasName) {
 		return new Alias(phraseName, aliasName);
+	}
+	
+	public void printBody(Object body) {
+		System.out.println("body class = " + body.getClass().getName());
+	}
+	
+	public List<Object> buildResponseList(Object list) {		
+		List response = new ArrayList<Object>();
+		response.add(list);
+		return response;
 	}
 
 }

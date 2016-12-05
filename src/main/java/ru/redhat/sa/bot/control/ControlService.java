@@ -21,4 +21,10 @@ public interface ControlService {
 	
 	@WebMethod
 	public void loadAliases(List<Alias> phrases);
+	
+	@WebMethod
+	public List<Phrase> unloadPhrases();
+	
+	@WebMethod
+	public List<Alias> unloadAliases();
 }

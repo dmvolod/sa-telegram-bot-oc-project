@@ -1,6 +1,11 @@
 package ru.redhat.sa.bot.db.mapping;
 
+import java.util.List;
+
 import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Result;
+import org.apache.ibatis.annotations.Results;
+import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
 import ru.redhat.sa.bot.db.Alias;
@@ -17,4 +22,19 @@ public interface ControlServiceMapping {
 	
 	@Insert("merge into T_PHRASE_ALIASES(PHRASE_NAME, ALIAS_NAME) KEY(ALIAS_NAME, PHRASE_NAME) values (#{phraseName}, #{aliasName})")
 	void insertAlias(Alias alias);
+	
+	@Results({
+        @Result(property = "phraseName", column = "PHRASE_NAME"),
+        @Result(property = "aliasName", column = "ALIAS_NAME")
+    })
+	@Select("select PHRASE_NAME, ALIAS_NAME from T_PHRASE_ALIASES order by PHRASE_NAME, ALIAS_NAME")
+	List<Alias> selectAliases();
+	
+	@Results({
+        @Result(property = "phraseName", column = "PHRASE_NAME"),
+        @Result(property = "phraseText", column = "PHRASE_TEXT"),
+        @Result(property = "phraseType", column = "PHRASE_TYPE")
+    })
+	@Select("select PHRASE_NAME, PHRASE_TEXT, PHRASE_TYPE from T_PHRASES")
+	List<Phrase> selectPhrases();
 }

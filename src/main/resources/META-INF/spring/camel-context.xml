@@ -45,6 +45,20 @@
                         <to id="insertAlias" uri="mybatis:insertAlias?statementType=Insert"/>
                     </split>
                 </when>
+                <when id="unloadAliases">
+                    <simple id="unloadAliases">${headers.operationName} == 'unloadAliases'</simple>
+                    <to id="selectAliases" uri="mybatis:selectAliases?statementType=SelectList"/>
+                    <bean beanType="messageBuilder"
+                        id="buildResponseList"
+                        method="buildResponseList" ref="messageBuilder"/>
+                </when>
+                <when id="unloadPhrases">
+                    <simple id="unloadPhrases">${headers.operationName} == 'unloadPhrases'</simple>
+                    <to id="selectPhrases" uri="mybatis:selectPhrases?statementType=SelectList"/>
+                    <bean beanType="messageBuilder"
+                        id="buildResponseList"
+                        method="buildResponseList" ref="messageBuilder"/>
+                </when>
             </choice>
         </route>
         <route id="BotCheckService">
@@ -87,7 +101,9 @@
                         id="buildAliasMessage"
                         method="buildAliasMessage(${header.phraseName}, ${header.phraseAlias})" ref="messageBuilder"/>
                     <to id="insertMemAlias" uri="mybatis:insertAlias?statementType=Insert"/>
-                    <setBody id="_setBody3"><simple/></setBody>
+                    <setBody id="_setBody3">
+                        <simple/>
+                    </setBody>
                 </when>
                 <when id="whenListMem">
                     <simple id="ifListMem">${headers.command} == ${type:ru.redhat.sa.bot.core.BotProcessor.LIST_MEM_CASE}</simple>
@@ -102,7 +118,9 @@
                 <when id="whenRandomPhrase">
                     <simple id="ifRandomPhrase">${headers.command} == ${type:ru.redhat.sa.bot.core.BotProcessor.RANDOM_MEM_CASE}</simple>
                     <log id="logRandomPhrase" message="RandomPhrase"/>
-                    <setBody id="_setBody4"><simple/></setBody>
+                    <setBody id="_setBody4">
+                        <simple/>
+                    </setBody>
                     <to id="randomPhrase" uri="mybatis:getRandomPhrase?statementType=SelectOne"/>
                     <bean beanType="nickPostProcessor"
                         id="nickPostProcessor2" ref="nickPostProcessor"/>
