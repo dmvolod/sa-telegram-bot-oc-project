@@ -113,7 +113,6 @@
                     <log id="logListMem" message="ListMem"/>
                     <to id="getAllMems" uri="mybatis:getAllMems?statementType=SelectList"/>
                     <convertBodyTo id="_convertBodyTo1" type="java.lang.String"/>
-                    <log id="logListMem" message="Body ${body}"/>
                 </when>
                 <when id="whenRandomPhrase">
                     <simple id="ifRandomPhrase">${headers.command} == ${type:ru.redhat.sa.bot.core.BotProcessor.RANDOM_MEM_CASE}</simple>
@@ -124,6 +123,14 @@
                     <to id="randomPhrase" uri="mybatis:getRandomPhrase?statementType=SelectOne"/>
                     <bean beanType="nickPostProcessor"
                         id="nickPostProcessor2" ref="nickPostProcessor"/>
+                </when>
+                <when id="whenRemoveMem">
+                    <simple id="ifLRemoveMem">${headers.command} == ${type:ru.redhat.sa.bot.core.BotProcessor.REMOVE_MEM_CASE}</simple>
+                   <setBody id="_setBody5">
+                        <simple>${headers.phraseName}</simple>
+                    </setBody>
+                    <log id="logRemoveMem" message="RemoveMem: ${headers.phraseName}"/>
+                    <to id="deleteMem" uri="mybatis:deleteMem?statementType=Delete"/>
                 </when>
             </choice>
         </route>

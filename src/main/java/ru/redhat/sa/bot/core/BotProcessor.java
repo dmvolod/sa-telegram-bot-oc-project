@@ -12,18 +12,21 @@ import org.springframework.stereotype.Component;
 public class BotProcessor implements Processor {
 	
 	private static final String STORE_MEM_COMMAND = "запомни";
-	private static final String LINK_MEM_COMMAND = "линк";
+	private static final String LINK_MEM_COMMAND = "алиас";
 	private static final String RANDOM_MEM_COMMAND = "мем";
 	private static final String LIST_MEM_COMMAND = "список";
+	private static final String REMOVE_MEM_COMMAND = "забудь";
 	
 	
-	private static final String[] CONTROL_COMMANDS = {STORE_MEM_COMMAND, LINK_MEM_COMMAND, RANDOM_MEM_COMMAND, LIST_MEM_COMMAND};
+	private static final String[] CONTROL_COMMANDS = {STORE_MEM_COMMAND, LINK_MEM_COMMAND, RANDOM_MEM_COMMAND, LIST_MEM_COMMAND, REMOVE_MEM_COMMAND};
 	
 	public static final String SEARCH_MEM_CASE = "search";
 	public static final String STORE_MEM_CASE = "storemem";
 	public static final String LINK_MEM_CASE = "addlink";
 	public static final String RANDOM_MEM_CASE = "randmem";
 	public static final String LIST_MEM_CASE = "listmem";
+	public static final String REMOVE_MEM_CASE = "removemem";
+	public static final String REMOVE_ALL_CASE = "removeall";
 
 	@Override
 	public void process(Exchange exchange) throws Exception {
@@ -49,12 +52,15 @@ public class BotProcessor implements Processor {
         	String command = st.nextToken().substring(1);
         	String phraseName = "";
         	String phraseAlias = "";
+        	String phraseText = "";
+        	
         	if  (st.hasMoreTokens()) {
         		phraseName = st.nextToken();
         	}
         	
-        	
-        	String phraseText = text.substring(text.indexOf(phraseName) + phraseName.length() + 1);
+        	if  (st.hasMoreTokens()) {
+        		phraseText = text.substring(text.indexOf(phraseName) + phraseName.length() + 1);
+        	}
         	
         	if (Arrays.asList(CONTROL_COMMANDS).contains(command)) {
         		switch (command) {
@@ -70,6 +76,14 @@ public class BotProcessor implements Processor {
         			case LINK_MEM_COMMAND:
         				command = LINK_MEM_CASE;
         				phraseAlias = phraseText;
+        				break;
+        			case REMOVE_MEM_COMMAND:
+        				if (phraseText.equals("*")) {
+        					command = REMOVE_ALL_CASE;
+        				} else {
+        					command = REMOVE_MEM_CASE;
+        				}
+        					
         				break;
         		}
         		
