@@ -136,14 +136,14 @@
                     </setBody>
                     <to id="deletelias" uri="mybatis:deleteAlias?statementType=Delete"/>
                     <setBody id="_setBody4">
-                        <simple/>
+                        <simple>Забыл о /${headers.phraseName}</simple>
                     </setBody>
                 </when>
-                <otherwise>
-                	<setBody id="_setBodyOtherwise">
+                <otherwise id="_otherwise1">
+                    <setBody id="_setBodyOtherwise">
                         <simple>${headers.phraseName}</simple>
                     </setBody>
-            	</otherwise>
+                </otherwise>
             </choice>
         </route>
         <route autoStartup="{{env:SA_TELEGRAM_OC_ENV}}" id="_route1">

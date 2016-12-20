@@ -16,7 +16,7 @@ import groovy.lang.GroovyShell;
 
 @Component
 public class BotProcessor implements Processor {
-	private static final String BOT_VERSION = "SA Telegram Bot Version 1.1.2";
+	private static final String BOT_VERSION = "SA Telegram Bot Version 1.1.3";
 	
 	private static final String STORE_MEM_COMMAND = "запомни";
 	private static final String LINK_MEM_COMMAND = "алиас";
@@ -110,16 +110,18 @@ public class BotProcessor implements Processor {
         			case SCRIPT_EN_BOT_COMMAND:
         				ImportCustomizer ic = new ImportCustomizer();
         				ic.addImports("org.apache.camel.component.telegram.model.IncomingMessage");
+        				ic.addImports("org.apache.camel.CamelContext");
 
-        				// Заготовленный import для скрипта помещается в конфигурацию
-        				// компилятора groovy
+        				// Заготовленный import для скрипта помещается в конфигурацию компилятора groovy
         				CompilerConfiguration cc = new CompilerConfiguration();
         				cc.addCompilationCustomizers(ic);
         				
         				Binding binding = new Binding();
         				binding.setVariable("msg", message);
+        				binding.setVariable("ctx", exchange.getContext());
+        				
         				GroovyShell shell = new GroovyShell(binding, cc);
-        				String script = text.substring(("/" + command).length());
+        				String script = text.substring((command).length() + 1);
         				
         				if (!script.equals("")) {
         					Object value = shell.evaluate(script);
