@@ -1,6 +1,7 @@
 package ru.redhat.sa.bot.core;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.StringTokenizer;
 
 import org.apache.camel.Exchange;
@@ -10,15 +11,18 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class BotProcessor implements Processor {
+	private static final String BOT_VERSION = "SA Telegram Bot Version 1.0.1";
 	
 	private static final String STORE_MEM_COMMAND = "запомни";
 	private static final String LINK_MEM_COMMAND = "алиас";
 	private static final String RANDOM_MEM_COMMAND = "мем";
 	private static final String LIST_MEM_COMMAND = "список";
 	private static final String REMOVE_MEM_COMMAND = "забудь";
+	private static final String VERSION_BOT_COMMAND = "версия";
+	private static final String DAY_BOT_COMMAND = "день";
 	
 	
-	private static final String[] CONTROL_COMMANDS = {STORE_MEM_COMMAND, LINK_MEM_COMMAND, RANDOM_MEM_COMMAND, LIST_MEM_COMMAND, REMOVE_MEM_COMMAND};
+	private static final String[] CONTROL_COMMANDS = {STORE_MEM_COMMAND, LINK_MEM_COMMAND, RANDOM_MEM_COMMAND, LIST_MEM_COMMAND, REMOVE_MEM_COMMAND, VERSION_BOT_COMMAND, DAY_BOT_COMMAND};
 	
 	public static final String SEARCH_MEM_CASE = "search";
 	public static final String STORE_MEM_CASE = "storemem";
@@ -27,6 +31,7 @@ public class BotProcessor implements Processor {
 	public static final String LIST_MEM_CASE = "listmem";
 	public static final String REMOVE_MEM_CASE = "removemem";
 	public static final String REMOVE_ALL_CASE = "removeall";
+	public static final String OTHERWISE_CASE = "other";
 
 	@Override
 	public void process(Exchange exchange) throws Exception {
@@ -82,8 +87,15 @@ public class BotProcessor implements Processor {
         					command = REMOVE_ALL_CASE;
         				} else {
         					command = REMOVE_MEM_CASE;
-        				}
-        					
+        				}	
+        				break;
+        			case VERSION_BOT_COMMAND:
+        				command = OTHERWISE_CASE;
+        				phraseName = BOT_VERSION;
+        				break;
+        			case DAY_BOT_COMMAND:
+        				command = OTHERWISE_CASE;
+        				phraseName = (new Date()).toString();
         				break;
         		}
         		

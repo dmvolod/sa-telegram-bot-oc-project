@@ -139,6 +139,11 @@
                         <simple/>
                     </setBody>
                 </when>
+                <otherwise>
+                	<setBody id="_setBodyOtherwise">
+                        <simple>${headers.phraseName}</simple>
+                    </setBody>
+            	</otherwise>
             </choice>
         </route>
         <route autoStartup="{{env:SA_TELEGRAM_OC_ENV}}" id="_route1">
