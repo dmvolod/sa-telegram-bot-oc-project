@@ -16,7 +16,7 @@ import groovy.lang.GroovyShell;
 
 @Component
 public class BotProcessor implements Processor {
-	private static final String BOT_VERSION = "SA Telegram Bot Version 1.1.1";
+	private static final String BOT_VERSION = "SA Telegram Bot Version 1.1.2";
 	
 	private static final String STORE_MEM_COMMAND = "запомни";
 	private static final String LINK_MEM_COMMAND = "алиас";
@@ -25,12 +25,13 @@ public class BotProcessor implements Processor {
 	private static final String REMOVE_MEM_COMMAND = "забудь";
 	private static final String VERSION_BOT_COMMAND = "версия";
 	private static final String DAY_BOT_COMMAND = "день";
-	private static final String SCRIPT_BOT_COMMAND = "скрипт";
+	private static final String SCRIPT_RU_BOT_COMMAND = "скрипт";
+	private static final String SCRIPT_EN_BOT_COMMAND = "script";
 	
 	
 	private static final String[] CONTROL_COMMANDS = {STORE_MEM_COMMAND, LINK_MEM_COMMAND, RANDOM_MEM_COMMAND,
 													  LIST_MEM_COMMAND, REMOVE_MEM_COMMAND, VERSION_BOT_COMMAND,
-													  DAY_BOT_COMMAND, SCRIPT_BOT_COMMAND};
+													  DAY_BOT_COMMAND, SCRIPT_RU_BOT_COMMAND, SCRIPT_EN_BOT_COMMAND};
 	
 	public static final String SEARCH_MEM_CASE = "search";
 	public static final String STORE_MEM_CASE = "storemem";
@@ -105,7 +106,8 @@ public class BotProcessor implements Processor {
         				command = OTHERWISE_CASE;
         				phraseName = (new Date()).toString();
         				break;
-        			case SCRIPT_BOT_COMMAND:
+        			case SCRIPT_RU_BOT_COMMAND:
+        			case SCRIPT_EN_BOT_COMMAND:
         				ImportCustomizer ic = new ImportCustomizer();
         				ic.addImports("org.apache.camel.component.telegram.model.IncomingMessage");
 
