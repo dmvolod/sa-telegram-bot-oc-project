@@ -41,4 +41,7 @@ public interface ControlServiceMapping {
 	
 	@Delete("delete from T_PHRASES where PHRASE_NAME = #{phraseName} and PHRASE_TYPE = 'MEM'")
 	void deleteMem(String phraseName);
+	
+	@Delete("delete from T_PHRASE_ALIASES where ALIAS_NAME = #{aliasName}")
+	void deleteAlias(String aliasName);
 }

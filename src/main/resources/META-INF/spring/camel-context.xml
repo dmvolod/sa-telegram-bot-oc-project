@@ -126,11 +126,18 @@
                 </when>
                 <when id="whenRemoveMem">
                     <simple id="ifLRemoveMem">${headers.command} == ${type:ru.redhat.sa.bot.core.BotProcessor.REMOVE_MEM_CASE}</simple>
-                   <setBody id="_setBody5">
+                    <setBody id="_setBody5">
                         <simple>${headers.phraseName}</simple>
                     </setBody>
                     <log id="logRemoveMem" message="RemoveMem: ${headers.phraseName}"/>
                     <to id="deleteMem" uri="mybatis:deleteMem?statementType=Delete"/>
+                    <setBody id="setAliasBody">
+                        <simple>${headers.phraseName}</simple>
+                    </setBody>
+                    <to id="deletelias" uri="mybatis:deleteAlias?statementType=Delete"/>
+                    <setBody id="_setBody4">
+                        <simple/>
+                    </setBody>
                 </when>
             </choice>
         </route>
