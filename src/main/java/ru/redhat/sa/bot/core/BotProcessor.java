@@ -16,7 +16,7 @@ import groovy.lang.GroovyShell;
 
 @Component
 public class BotProcessor implements Processor {
-	private static final String BOT_VERSION = "SA Telegram Bot Version 1.1.3";
+	private static final String BOT_VERSION = "SA Telegram Bot Version 1.1.4";
 	
 	private static final String STORE_MEM_COMMAND = "запомни";
 	private static final String LINK_MEM_COMMAND = "алиас";
@@ -62,6 +62,10 @@ public class BotProcessor implements Processor {
         if (text == null) {
         	
         } else if (text.startsWith("/")) {
+        	if (text.length() > 1 && text.substring(1, 2).equals(" ")) {
+        		text = "/" + SCRIPT_EN_BOT_COMMAND + " " + text.substring(2);
+        	}
+        	
         	StringTokenizer st = new StringTokenizer(text, " ");
         	String command = st.nextToken().substring(1);
         	String phraseName = "";

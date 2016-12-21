@@ -68,7 +68,7 @@
                 method="buildIncomingTelegramMessage" ref="messageBuilder"/>
             <to id="toBotMainRoute" uri="direct:botMain"/>
         </route>
-        <route id="BotMainRoute">
+        <route id="BotMainService">
             <from id="fromBotMainRoute" uri="direct:botMain"/>
             <bean beanType="botProcessor" id="botProcessor" ref="botProcessor"/>
             <log id="_log1" message="Header:command ${headers.command}"/>
@@ -146,7 +146,7 @@
                 </otherwise>
             </choice>
         </route>
-        <route autoStartup="{{env:SA_TELEGRAM_OC_ENV}}" id="_route1">
+        <route autoStartup="{{env:SA_TELEGRAM_OC_ENV}}" id="TelegramService">
             <from id="_from1" uri="telegram:bots/{{env:SA_TELEGRAM_BOT_TOKEN}}"/>
             <to id="_to2" uri="direct:botMain"/>
             <choice id="_choice1">
