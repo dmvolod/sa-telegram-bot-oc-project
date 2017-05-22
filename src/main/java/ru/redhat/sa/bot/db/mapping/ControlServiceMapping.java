@@ -16,7 +16,13 @@ public interface ControlServiceMapping {
 	
 	@Update("CREATE TABLE IF NOT EXISTS T_PHRASES(PHRASE_NAME VARCHAR(50), PHRASE_TEXT VARCHAR(255), PHRASE_TYPE VARCHAR(30)); "
 			+ "CREATE TABLE IF NOT EXISTS T_PHRASE_ALIASES(PHRASE_NAME VARCHAR(50), ALIAS_NAME VARCHAR(50));")
-	void createTables();
+	void createTables10();
+	
+	@Update("CREATE TABLE IF NOT EXISTS T_ENTITY(uuid UUID PRIMARY KEY, date_time TIMESTAMP, version VARCHAR(64), status VARCHAR(64)," +
+			"classifier VARCHAR(64), color VARCHAR(64), morphology VARCHAR(64), user_key VARCHAR(64), user_key_reference VARCHAR(64)," +
+			"body VARCHAR(64000));" +
+			"CREATE TABLE IF NOT EXISTS T_LOG(uuid UUID PRIMARY KEY, date_time TIMESTAMP, user_name VARCHAR(64), body VARCHAR(64000));")
+	void createTables20();
 	
 	@Insert("merge into T_PHRASES(PHRASE_NAME, PHRASE_TEXT, PHRASE_TYPE) KEY(PHRASE_NAME) values (#{phraseName}, #{phraseText}, #{phraseType})")
 	void insertPhrase(Phrase phrase);

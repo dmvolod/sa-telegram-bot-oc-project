@@ -24,10 +24,15 @@
         <route id="BotControlService">
             <from id="fromControlServiceEndpoint" uri="cxf:bean:controlServiceEndpoint?allowStreaming=false&amp;dataFormat=POJO"/>
             <log id="logOperationName" message="Operation Name: ${header.operationName}"/>
+            <log id="logBody" message="Body: ${body}"/>
             <choice id="ChoiceControlServiceOperation">
-                <when id="initiateDatabase">
-                    <simple id="initiateDatabase">${headers.operationName} == 'initiateDatabase'</simple>
-                    <to id="createTables" uri="mybatis:createTables?statementType=Update"/>
+                <when id="initiateDatabase_1.0">
+                    <simple id="initiateDatabase_1.0">${headers.operationName} == 'initiateDatabase' &amp;&amp; ${body} == '1.0'</simple>
+                    <to id="createTables_1.0" uri="mybatis:createTables10?statementType=Update"/>
+                </when>
+                <when id="initiateDatabase_2.0">
+                    <simple id="initiateDatabase_2.0">${headers.operationName} == 'initiateDatabase' &amp;&amp; ${body} == '2.0'</simple>
+                    <to id="createTables_2.0" uri="mybatis:createTables20?statementType=Update"/>
                 </when>
                 <when id="loadPhrases">
                     <simple id="loadPhrases">${headers.operationName} == 'loadPhrases'</simple>
@@ -139,6 +144,12 @@
                         <simple>Забыл о /${headers.phraseName}</simple>
                     </setBody>
                 </when>
+                <when id="whenAnyText">
+                    <simple id="ifAnyText">${headers.command} == ${type:ru.redhat.sa.bot.core.BotProcessor.ANY_TEXT_CASE}</simple>
+                    <setBody id="_setEmptyBody">
+                        <simple/>
+                    </setBody>
+                </when>
                 <otherwise id="_otherwise1">
                     <setBody id="_setBodyOtherwise">
                         <simple>${headers.phraseName}</simple>
@@ -155,6 +166,10 @@
                     <to id="_to1" uri="telegram:bots/{{env:SA_TELEGRAM_BOT_TOKEN}}"/>
                 </when>
             </choice>
+        </route>
+        <route id="BotTestService">
+            <from id="fromBotTestRoute" uri="direct:botTest"/>
+            <log id="logTestRoute" message="LogTestRouteBody: ${body}"/>
         </route>
     </camelContext>
 </beans>

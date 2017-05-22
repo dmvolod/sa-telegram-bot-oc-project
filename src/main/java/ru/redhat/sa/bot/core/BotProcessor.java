@@ -1,11 +1,14 @@
 package ru.redhat.sa.bot.core;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.StringTokenizer;
 
+import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
+import org.apache.camel.ProducerTemplate;
 import org.apache.camel.component.telegram.model.IncomingMessage;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
@@ -17,6 +20,7 @@ import groovy.lang.GroovyShell;
 @Component
 public class BotProcessor implements Processor {
 	private static final String BOT_VERSION = "SA Telegram Bot Version 1.1.4";
+	private static final String SA_TELEGRAM_OC_GROOVY_SCRIPT_DEFAULT = "/u01/app/groovy/scripts/defaultProcessor.groovy";
 	
 	private static final String STORE_MEM_COMMAND = "запомни";
 	private static final String LINK_MEM_COMMAND = "алиас";
@@ -41,6 +45,7 @@ public class BotProcessor implements Processor {
 	public static final String REMOVE_MEM_CASE = "removemem";
 	public static final String REMOVE_ALL_CASE = "removeall";
 	public static final String OTHERWISE_CASE = "other";
+	public static final String ANY_TEXT_CASE = "any";
 
 	@Override
 	public void process(Exchange exchange) throws Exception {
@@ -58,19 +63,16 @@ public class BotProcessor implements Processor {
         
         String text = message.getText();
         String nickName = message.getFrom().getFirstName();
+        String command = "";
+        String phraseName = "";
+        String phraseAlias = "";
+    	String phraseText = "";
         
         if (text == null) {
-        	
+        	return;
         } else if (text.startsWith("/")) {
-        	if (text.length() > 1 && text.substring(1, 2).equals(" ")) {
-        		text = "/" + SCRIPT_EN_BOT_COMMAND + " " + text.substring(2);
-        	}
-        	
         	StringTokenizer st = new StringTokenizer(text, " ");
-        	String command = st.nextToken().substring(1);
-        	String phraseName = "";
-        	String phraseAlias = "";
-        	String phraseText = "";
+        	command = st.nextToken().substring(1);
         	
         	if  (st.hasMoreTokens()) {
         		phraseName = st.nextToken();
@@ -115,23 +117,31 @@ public class BotProcessor implements Processor {
         				ImportCustomizer ic = new ImportCustomizer();
         				ic.addImports("org.apache.camel.component.telegram.model.IncomingMessage");
         				ic.addImports("org.apache.camel.CamelContext");
+        				ic.addImports("org.apache.camel.ProducerTemplate");
 
         				// Заготовленный import для скрипта помещается в конфигурацию компилятора groovy
         				CompilerConfiguration cc = new CompilerConfiguration();
         				cc.addCompilationCustomizers(ic);
         				
+        				CamelContext ctx = exchange.getContext();
+        				ProducerTemplate template = ctx.createProducerTemplate();
+        				
         				Binding binding = new Binding();
         				binding.setVariable("msg", message);
-        				binding.setVariable("ctx", exchange.getContext());
+        				binding.setVariable("ctx", ctx);
+        				binding.setVariable("template", template);
         				
         				GroovyShell shell = new GroovyShell(binding, cc);
-        				String script = text.substring((command).length() + 1);
+        				// String script = text.substring((command).length() + 1);
+        				String scriptPath = System.getenv("SA_TELEGRAM_OC_GROOVY_SCRIPT") == null ? SA_TELEGRAM_OC_GROOVY_SCRIPT_DEFAULT : System.getenv("SA_TELEGRAM_OC_GROOVY_SCRIPT");
+        				Object value = shell.evaluate(new File(scriptPath));
         				
-        				if (!script.equals("")) {
+        				/*if (!script.equals("")) {
         					Object value = shell.evaluate(script);
-        					phraseName = value.toString();
-        				}
-        				
+        					if (value != null) {
+        						phraseName = value.toString();
+        					}
+        				}*/
         				command = OTHERWISE_CASE;
         				break;
         		}
@@ -140,19 +150,19 @@ public class BotProcessor implements Processor {
         		phraseName = command;
         		command = SEARCH_MEM_CASE;
         	}
-        		
-        	exchange.getOut().setHeader("command", command);
-        	exchange.getOut().setHeader("phraseName", phraseName);
-        	exchange.getOut().setHeader("phraseAlias", phraseAlias);
-        	exchange.getOut().setHeader("phraseText", phraseText);
-        	exchange.getOut().setHeader("nickName", nickName);
-        	
-        	System.out.println("command: " + command);
-        	System.out.println("phraseName: " + phraseName);
-        	System.out.println("phraseText: " + phraseText);    	
         } else {
-        	
+        	command = ANY_TEXT_CASE;
         }
+        
+        exchange.getOut().setHeader("command", command);
+    	exchange.getOut().setHeader("phraseName", phraseName);
+    	exchange.getOut().setHeader("phraseAlias", phraseAlias);
+    	exchange.getOut().setHeader("phraseText", phraseText);
+    	exchange.getOut().setHeader("nickName", nickName);
+    	
+    	System.out.println("command: " + command);
+    	System.out.println("phraseName: " + phraseName);
+    	System.out.println("phraseText: " + phraseText);    	
         
         // exchange.getOut().setBody(text, String.class);
 	}

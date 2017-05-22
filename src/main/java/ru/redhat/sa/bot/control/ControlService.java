@@ -14,7 +14,7 @@ import ru.redhat.sa.bot.db.Phrase;
 public interface ControlService {
 	
 	@WebMethod
-	public void initiateDatabase();
+	public void initiateDatabase(String version);
 	
 	@WebMethod
 	public void loadPhrases(List<Phrase> phrases);
