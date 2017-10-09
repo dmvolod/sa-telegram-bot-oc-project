@@ -19,7 +19,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <fabric8.label.component>${project.artifactId}</fabric8.label.component>
     <fabric8.dockerUser>fabric8/</fabric8.dockerUser>
-    <fuse.version>6.3.0.redhat-187</fuse.version>
+    <fuse.version>6.3.0.redhat-254</fuse.version>
   </properties>
   <dependencyManagement>
     <dependencies>
