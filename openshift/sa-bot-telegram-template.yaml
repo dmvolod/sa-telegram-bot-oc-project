@@ -1,0 +1,168 @@
+apiVersion: v1
+kind: Template
+parameters:
+- name: APPLICATION_NAME
+  value: sa-telegram-bot-oc
+- name: GITHUB_HOOK_SECRET
+  from: '[a-zA-Z0-9]{16}'
+  generate: expression
+- name: GENERIC_HOOK_SECRET
+  from: '[a-zA-Z0-9]{16}'
+  generate: expression
+metadata:
+  creationTimestamp: null
+  name: Red Hat CIS SA Telegram Bot Template
+objects:
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    labels:
+      app: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ${APPLICATION_NAME}:latest
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      git:
+        ref: master
+        uri: https://github.com/dmvolod/sa-telegram-bot-oc-project.git
+      type: Git
+    strategy:
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: fis-java-openshift:latest
+          namespace: openshift
+        incremental: true
+      type: Source
+    triggers:
+    - generic:
+        secret: ${GENERIC_HOOK_SECRET}
+      type: Generic
+    - github:
+        secret: ${GITHUB_HOOK_SECRET}
+      type: GitHub
+    - imageChange: {}
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    labels:
+      app: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+#  spec:
+#    tags:
+#    - annotations: null
+#      from:
+#        kind: DockerImage
+#        name: 172.30.4.240:5000/sa-bot-project/${APPLICATION_NAME}:latest
+#      importPolicy: {}
+#      name: latest
+#      referencePolicy:
+#        type: Source
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+  spec:
+    replicas: 1
+    selector:
+      deploymentconfig: ${APPLICATION_NAME}
+    strategy:
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          app: ${APPLICATION_NAME}
+          deploymentconfig: ${APPLICATION_NAME}
+      spec:
+        containers:
+        - env:
+          - name: LANG
+            value: en_US.UTF-8
+          - name: TZ
+            value: Europe/Moscow
+          - name: SA_TELEGRAM_BOT_TOKEN
+            value: 286105384:AAGx4Dcr7IzxwMz3PFO4XPDvCp7d1dnFMhY
+          - name: SA_TELEGRAM_OC_ENV
+            value: "true"
+          image: ' '
+#          172.30.4.240:5000/sa-bot-project/${APPLICATION_NAME}@sha256:52994c0995b06bfd9eb59e66ba929d6db51f4eb3ba21bd9a7ae9fefa19e71f53
+          imagePullPolicy: Always
+          name: ${APPLICATION_NAME}
+          ports:
+          - containerPort: 8778
+            name: jolokia
+            protocol: TCP
+          - containerPort: 8000
+            name: 8000-tcp
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          volumeMounts:
+          - mountPath: /u01/app/apache/h2/data
+            name: botdb-storage-volume
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - name: botdb-storage-volume
+          persistentVolumeClaim:
+            claimName: botdb-storage
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - ${APPLICATION_NAME}
+        from:
+          kind: ImageStreamTag
+          name: ${APPLICATION_NAME}:latest
+          namespace: sa-bot-project
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: ${APPLICATION_NAME}
+    name: ${APPLICATION_NAME}
+  spec:
+    ports:
+    - port: 8000
+      protocol: TCP
+      targetPort: 8000
+    selector:
+      deploymentconfig: ${APPLICATION_NAME}
+    sessionAffinity: None
+    type: ClusterIP
+- apiVersion: v1
+  kind: Route
+  metadata:
+    name: ${APPLICATION_NAME}-mngt
+  spec:
+#    host: ${APPLICATION_NAME}-mngt-sa-bot-project.apps.ose.redhat.demo.mont.com
+    path: /bot-control-service
+    to:
+      kind: Service
+      name: ${APPLICATION_NAME}
+      weight: 100
+    wildcardPolicy: None
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: botdb-storage
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 90Mi
